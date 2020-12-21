@@ -1,0 +1,9 @@
+﻿.color{
+    height:3em;
+}
+
+@media (min-width: 641px) {
+    .color{
+        height:75vh;
+    }
+}

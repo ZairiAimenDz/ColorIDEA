@@ -1,7 +1,86 @@
-﻿@page "/generate" 
+﻿@page "/generate"
+@page "/generate/{*palette}"
 
-<h3>Generate</h3>
+<div class="full-screen">
+    <h3>Generate</h3>
 
+    <div class="row">
+        @if (Colors is not null)
+        {
+            @foreach (var color in Colors)
+            {
+                <div class="col-sm color text-center" style="display:flex;flex-direction:column;align-items:center;background-color:#@color;min-height:40vh;">
+                    @if (Colors.Count > 2)
+                    {
+                        <a @onclick="@(e => Colors.Remove(color))" class="clipboard mt-auto mb-2 btn"><span class="oi oi-trash"></span></a>
+                        <a class="clipboard mb-4 btn"><span class="oi oi-clipboard"></span></a>
+                    }
+                    else
+                    {
+                        <a class="clipboard mb-4 mt-auto btn"><span class="oi oi-clipboard"></span></a>
+                    }
+
+                    <p class="btn text-center w-100 font-weight-bold">@color.ToUpper()</p>
+                </div>
+            }
+            @if (Colors.Count() < 10)
+            {
+                <div class="col-sm-1">
+                    <a @onclick="@(e => Colors.Add("ea1234"))" class="mt-auto mb-auto btn" style="cursor:pointer;"><span class="oi oi-plus"></span></a>
+                </div>
+            }
+        }
+    </div>
+</div>
 @code {
+    [Parameter]
+    public string palette { get; set; }
 
+    public List<String> Colors;
+
+    public bool pals;
+
+    protected override void OnInitialized()
+    {
+        if (palette is not null)
+        {
+            if (CheckPalette(palette))
+            {
+                Colors = palette.Split("-").ToList();
+                pals = true;
+            }
+        }
+        else
+        {
+            Colors = new List<string>();
+
+        }
+    }
+
+    private bool CheckPalette(string pal)
+    {
+        const string ls = "0123456789abcdefABCDEF";
+        if (pal.Length < 70 && pal.Split("-").Count() < 11)
+        {
+            foreach (var item in pal.Split("-"))
+            {
+                if (item.Length == 6)
+                {
+                    foreach (var ch in item.ToArray())
+                    {
+                        if (!ls.Contains(ch))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }

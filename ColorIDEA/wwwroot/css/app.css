@@ -8,6 +8,7 @@ a, .btn-link {
     color: #0366d6;
 }
 
+
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
@@ -48,3 +49,51 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+
+.full-screen {
+}
+
+.color {
+    height: 20vh;
+}
+
+.color > .clipboard {
+    display:none;
+}
+
+.color:hover > p {
+    color:white;
+    background-color:black;
+    padding:8px;
+    border-radius:8px;
+    width:100%;
+}
+.color:hover > .clipboard{
+    display:block;
+}
+
+    .color > a:hover {
+        background-color: white;
+        border-radius: 4px;
+        cursor:pointer;
+    }
+
+.visibleonhover{
+    display:none;
+}
+
+.visibleonhover:hover{
+    display:inherit;
+    width:auto;
+    height:auto;
+}
+
+@media (min-width: 641px) {
+    .color{
+        height:40vh;
+    }
+    .full-screen{
+        height:95vh;
+    }
+}
