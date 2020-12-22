@@ -1,10 +1,13 @@
 ﻿@page "/generate"
 @page "/generate/{*palette}"
+@inject Services.ClipboardService clipboard
+@inject NavigationManager navman
 
 <div class="full-screen">
-    <h3>Generate</h3>
+    @*Here Goes The Menu*@
+    <a @onclick="@(e => OnInitialized())"  class="clipboard text-white mt-auto mb-2 btn btn-primary"><span class="oi oi-cog"></span> Regenerate Palette</a>
 
-    <div class="row">
+    <div class="row mb-2" style="margin:0;padding:0;">
         @if (Colors is not null)
         {
             @foreach (var color in Colors)
@@ -13,11 +16,11 @@
                     @if (Colors.Count > 2)
                     {
                         <a @onclick="@(e => Colors.Remove(color))" class="clipboard mt-auto mb-2 btn"><span class="oi oi-trash"></span></a>
-                        <a class="clipboard mb-4 btn"><span class="oi oi-clipboard"></span></a>
+                        <a @onclick="@(e=>CopyToClipboard("#"+color))" class="clipboard mb-4 btn"><span class="oi oi-clipboard"></span></a>
                     }
                     else
                     {
-                        <a class="clipboard mb-4 mt-auto btn"><span class="oi oi-clipboard"></span></a>
+                        <a @onclick="@(e=>CopyToClipboard("#"+color))" class="clipboard mb-4 mt-auto btn"><span class="oi oi-clipboard"></span></a>
                     }
 
                     <p class="btn text-center w-100 font-weight-bold">@color.ToUpper()</p>
@@ -26,17 +29,25 @@
             @if (Colors.Count() < 10)
             {
                 <div class="col-sm-1">
-                    <a @onclick="@(e => Colors.Add("ea1234"))" class="mt-auto mb-auto btn" style="cursor:pointer;"><span class="oi oi-plus"></span></a>
+                    <a @onclick="@(e => Colors.Add(GenerateRandomColor(6)))" class="mt-auto mb-auto btn" style="cursor:pointer;"><span class="oi oi-plus"></span></a>
                 </div>
             }
         }
+        else
+        {
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        }
     </div>
+    <a @onclick="@(e =>CopyToClipboard(GenerateLink()))" class="clipboard text-white mt-auto p-2 btn btn-primary"><span class="oi oi-share"></span> Share This Palette</a>
+
 </div>
 @code {
     [Parameter]
     public string palette { get; set; }
 
-    public List<String> Colors;
+    public HashSet<String> Colors;
 
     public bool pals;
 
@@ -46,14 +57,32 @@
         {
             if (CheckPalette(palette))
             {
-                Colors = palette.Split("-").ToList();
+                Colors = palette.Split("-").ToHashSet();
                 pals = true;
             }
         }
         else
         {
-            Colors = new List<string>();
+            var num = Colors is null || Colors.Count()==0 ? 5 : Colors.Count();
+            Colors = new HashSet<string>();
+            for (int i = 0; i < num; i++)
+            {
+                Colors.Add(GenerateRandomColor(6));
+            }
 
+        }
+    }
+
+    async Task CopyToClipboard(string text)
+    {
+        // Writing to the clipboard may be denied, so you must handle the exception
+        try
+        {
+            await clipboard.WriteTextAsync(text);
+        }
+        catch
+        {
+            Console.WriteLine("Cannot write text to clipboard");
         }
     }
 
@@ -82,5 +111,28 @@
             return true;
         }
         return false;
+    }
+    private string GenerateRandomColor(int length)
+    {
+        const string valid = "0123456789ABCDEF";
+        StringBuilder res = new StringBuilder();
+        Random rnd = new Random();
+        while (0 < length--)
+        {
+            res.Append(valid[rnd.Next(valid.Length)]);
+        }
+        return res.ToString();
+    }
+    private string GenerateLink()
+    {
+        StringBuilder res = new StringBuilder();
+        res.Append(navman.BaseUri);
+        res.Append("/generate/");
+        foreach (var col in Colors)
+        {
+            res.Append(col+"-");
+        }
+        res.Remove(res.Length-1, 1);
+        return res.ToString();
     }
 }
